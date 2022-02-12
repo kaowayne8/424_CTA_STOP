@@ -26,9 +26,10 @@ library(gridExtra)
 # assume all of the tsv files in this directory are data of the same kind that I want to visualize
 uic <- read.table(file="uic.tsv", quote="", sep="\t", header=TRUE)
 ohare <- read.table(file="ohare.tsv", quote="", sep="\t", header=TRUE)
+cermak <- read.table(file="cermak.tsv", quote="", sep="\t", header=TRUE)
 
 
-stations <- c("UIC-Halsted", "O'Hare Airport")
+stations <- c("UIC-Halsted", "O'Hare Airport", "54th/Cermak")
 graphs <- c("All Years", "Each Day", "Each Month", "Each Day of Week", "Table")
 years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021)
 
@@ -92,7 +93,7 @@ server <- function(input, output) {
       dataset <- ohare
     }
     else{
-      dataset <- uic
+      dataset <- cermak
     }
     subset(dataset, year(ymd(newDates)) == input$select_left_year)
   })
@@ -106,7 +107,7 @@ server <- function(input, output) {
       dataset <- ohare
     }
     else{
-      dataset <- uic
+      dataset <- cermak
     }
     subset(dataset, year(ymd(newDates)) == input$select_right_year)
   })
@@ -125,7 +126,7 @@ server <- function(input, output) {
       p_all_data = ohare
     }
     else{
-      p_all_data = uic
+      p_all_data = cermak
     }
     
     uic2021 <- p_data
@@ -160,7 +161,7 @@ server <- function(input, output) {
         fill_var <- uic2021$season
       }
       else{
-        
+        fill_var <- uic2021$season
       }
       c<-ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
                                   fill=fill_var)) +
@@ -171,12 +172,9 @@ server <- function(input, output) {
         c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="School")+
           scale_fill_manual(labels=c("In School", "On Break"), values=c("seagreen", "indianred1"))
       }
-      else if(p_station == "O'Hare Airport"){
+      else {
         c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Season")+
           scale_fill_manual(labels=seasons_label, values=seasons_color)
-      }
-      else{
-        
       }
       c
     }
@@ -223,15 +221,12 @@ server <- function(input, output) {
           scale_fill_manual(labels=c("In School", "On Break"), values=c("seagreen", "indianred1"))
         
       }
-      else if(p_station == "O'Hare Airport"){
+      else{
         c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Season")+
           scale_fill_manual(labels=seasons_label, values=seasons_color)
         fill_var <- uic2021$season
         
         
-        
-      }
-      else{
         
       }
       grid.arrange(a,b,c,d,nrow=2)
@@ -253,7 +248,7 @@ server <- function(input, output) {
       p_all_data = ohare
     }
     else{
-      p_all_data = uic
+      p_all_data = cermak
     }
     
     uic2021 <- p_data
@@ -288,7 +283,7 @@ server <- function(input, output) {
         fill_var <- uic2021$season
       }
       else{
-        
+        fill_var <- uic2021$season
       }
       c<-ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
                                   fill=fill_var)) +
@@ -299,12 +294,9 @@ server <- function(input, output) {
         c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="School")+
           scale_fill_manual(labels=c("In School", "On Break"), values=c("seagreen", "indianred1"))
       }
-      else if(p_station == "O'Hare Airport"){
+      else {
         c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Season")+
           scale_fill_manual(labels=seasons_label, values=seasons_color)
-      }
-      else{
-        
       }
       c
     }
@@ -351,15 +343,12 @@ server <- function(input, output) {
           scale_fill_manual(labels=c("In School", "On Break"), values=c("seagreen", "indianred1"))
         
       }
-      else if(p_station == "O'Hare Airport"){
+      else{
         c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Season")+
           scale_fill_manual(labels=seasons_label, values=seasons_color)
         fill_var <- uic2021$season
         
         
-        
-      }
-      else{
         
       }
       grid.arrange(a,b,c,d,nrow=2)
