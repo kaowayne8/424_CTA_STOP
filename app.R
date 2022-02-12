@@ -35,11 +35,23 @@ years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014
 
 # Create the shiny dashboard
 ui <- shinyUI(
-  navbarPage("CTA Riders",
+  navbarPage("CTA Riders", position = "fixed-bottom",
              tabPanel("Plot",
-                      
                       fluidPage(
-                        fluidRow(
+                        fluidRow(style="padding-top: 5%",
+                          #UIC Halsted (left) chart
+                          column(1),
+                          column(5,
+                                 plotOutput("left_plot", height = 800)
+                          ),
+                          #O'Hare (right) chart
+                          column(5,
+                                 plotOutput("right_plot", height = 800)
+                          ),
+                          column(1)
+                        ),
+                      
+                        fluidRow( style="padding-top: 2%; padding-bottom: 5%",
                           #UIC Halsted (left) control panel
                           column(6, align="center",
                                 selectInput("select_left", "Select Station", stations, selected="UIC-Halsted"),
@@ -53,24 +65,16 @@ ui <- shinyUI(
                                  selectInput("select_right_graph", "Select Graph", graphs, selected="All Years"),
                                  selectInput("select_right_year", "Select Year", years, selected="2021")
                           )
-                        ),
-                        
-                        fluidRow(
-                          #UIC Halsted (left) chart
-                          column(6,
-                                 plotOutput("left_plot", height = 600)
-                          ),
-                          #O'Hare (right) chart
-                          column(6,
-                                 plotOutput("right_plot", height = 600)
-                          )
                         )
-                        
                       )
               ),
              tabPanel("About",
                       h4("About page")
-              )
+              ),
+             tags$style(type="text/css", 
+                        '.navbar{
+                font-size: 30px;
+             }')
   )
 )
 
