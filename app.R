@@ -58,11 +58,11 @@ ui <- shinyUI(
                         fluidRow(
                           #UIC Halsted (left) chart
                           column(6,
-                                 plotOutput("left_plot", height = "80%")
+                                 plotOutput("left_plot", height = 600)
                           ),
                           #O'Hare (right) chart
                           column(6,
-                                 plotOutput("right_plot", height = "80%")
+                                 plotOutput("right_plot", height = 600)
                           )
                         )
                         
