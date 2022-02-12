@@ -4,23 +4,10 @@
 # Author: Wayne Kao
 
 #TODO:
-# Fix colors on graphs
 # Add to about page
 # Test on Shiny app
 # Add third station for dataset
 
-#Ohare:
-# Seasons
-#UIC
-# Seasons
-
-# Month :
-#   Ohare make new column for seasons
-#   UIC-Halsted make new column for school month/ not school month
-
-#Day:
-#   UIC-Seperate by seasons
-#   Ohare - seperate by seasons in graph
 
 #libraries to include
 
@@ -39,9 +26,6 @@ library(gridExtra)
 # assume all of the tsv files in this directory are data of the same kind that I want to visualize
 uic <- read.table(file="uic.tsv", quote="", sep="\t", header=TRUE)
 ohare <- read.table(file="ohare.tsv", quote="", sep="\t", header=TRUE)
-
-#Add a column for school month / not school month
-uic$school_day <- uic[]
 
 
 stations <- c("UIC-Halsted", "O'Hare Airport")
@@ -171,15 +155,28 @@ server <- function(input, output) {
       b
     }
     else if(p_year_select == "Each Month"){
+      fill_var <- NULL
+      if(p_station == "UIC-Halsted"){
+        fill_var <- uic2021$school
+      }
+      else if(p_station == "O'Hare Airport"){
+        fill_var <- uic2021$season
+      }
+      else{
+        fill_var <- uic2021$school
+      }
       c<-ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
-                               fill=factor(month(ymd(newDates))))) +
+                               fill=fill_var)) +
         geom_bar(stat="identity") + 
-        labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Month") +
-        scale_x_discrete(limit = factor(monthLimit), labels=monthLabel) +
-        scale_fill_discrete(name = "Month", labels = monthLabel)
+        scale_x_discrete(limit = factor(monthLimit), labels=monthLabel) 
       #Adjust colors for UIC-Halsted 
       if(p_station == "UIC-Halsted"){
-        c <- c + scale_fill_manual(labels=monthLabel, values=c("seagreen", "seagreen", "seagreen", "seagreen", "indianred1", "indianred1", "indianred1", "indianred1", "seagreen", "seagreen", "seagreen", "indianred1")) 
+        c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="School")+
+          scale_fill_manual(labels=c("In School", "On Break"), values=c("seagreen", "indianred1"))
+      }
+      else if(p_station == "O'Hare Airport"){
+        c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Season")+
+          scale_fill_manual(labels=seasons_label, values=seasons_color)
       }
       c
     }
@@ -190,7 +187,7 @@ server <- function(input, output) {
         scale_x_discrete(limit = factor(weekDayLimit), labels=weekDayLabel) +
         scale_fill_discrete(name = "Weekday", labels = weekDayLabel)
       if(p_station == "UIC-Halsted"){
-        d <- d + scale_fill_manual(labels=monthLabel, values=c("indianred1", "seagreen", "seagreen", "seagreen", "seagreen", "seagreen", "indianred1")) 
+        d <- d + scale_fill_manual(labels=weekDayLabel, values=c("indianred1", "seagreen", "seagreen", "seagreen", "seagreen", "seagreen", "indianred1")) 
       }
       d
     }
@@ -268,14 +265,28 @@ server <- function(input, output) {
       b
     }
     else if(p_year_select == "Each Month"){
-      c<-ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
-                                  fill=factor(month(ymd(newDates))))) +
-        geom_bar(stat="identity") + 
-        labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Month") +
-        scale_x_discrete(limit = factor(monthLimit), labels=monthLabel) +
-        scale_fill_discrete(name = "Month", labels = monthLabel)
+      fill_var <- NULL
       if(p_station == "UIC-Halsted"){
-        c <- c + scale_fill_manual(labels=monthLabel, values=c("seagreen", "seagreen", "seagreen", "seagreen", "indianred1", "indianred1", "indianred1", "indianred1", "seagreen", "seagreen", "seagreen", "indianred1")) 
+        fill_var <- uic2021$school
+      }
+      else if(p_station == "O'Hare Airport"){
+        fill_var <- uic2021$season
+      }
+      else{
+        fill_var <- uic2021$school
+      }
+      c<-ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
+                                  fill=fill_var)) +
+        geom_bar(stat="identity") + 
+        scale_x_discrete(limit = factor(monthLimit), labels=monthLabel) 
+      #Adjust colors for UIC-Halsted 
+      if(p_station == "UIC-Halsted"){
+        c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="School")+
+          scale_fill_manual(labels=c("In School", "On Break"), values=c("seagreen", "indianred1"))
+      }
+      else if(p_station == "O'Hare Airport"){
+        c <- c + labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Season")+
+          scale_fill_manual(labels=seasons_label, values=seasons_color)
       }
       c
     }
@@ -286,7 +297,7 @@ server <- function(input, output) {
         scale_x_discrete(limit = factor(weekDayLimit), labels=weekDayLabel) +
         scale_fill_discrete(name = "Weekday", labels = weekDayLabel)
       if(p_station == "UIC-Halsted"){
-        d <- d + scale_fill_manual(labels=monthLabel, values=c("indianred1", "seagreen", "seagreen", "seagreen", "seagreen", "seagreen", "indianred1")) 
+        d <- d + scale_fill_manual(labels=weekDayLabel, values=c("indianred1", "seagreen", "seagreen", "seagreen", "seagreen", "seagreen", "indianred1")) 
       }
       d
     }
