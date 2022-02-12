@@ -9,6 +9,18 @@
 # Test on Shiny app
 # Add third station for dataset
 
+#Ohare:
+# Seasons
+#UIC
+# Seasons
+
+# Month :
+#   Ohare make new column for seasons
+#   UIC-Halsted make new column for school month/ not school month
+
+#Day:
+#   UIC-Seperate by seasons
+#   Ohare - seperate by seasons in graph
 
 #libraries to include
 
@@ -28,6 +40,9 @@ library(gridExtra)
 uic <- read.table(file="uic.tsv", quote="", sep="\t", header=TRUE)
 ohare <- read.table(file="ohare.tsv", quote="", sep="\t", header=TRUE)
 
+#Add a column for school month / not school month
+uic$school_day <- uic[]
+
 
 stations <- c("UIC-Halsted", "O'Hare Airport")
 graphs <- c("All Years", "Each Day", "Each Month", "Each Day of Week", "Table")
@@ -42,16 +57,16 @@ ui <- shinyUI(
                           #UIC Halsted (left) chart
                           column(1),
                           column(5,
-                                 plotOutput("left_plot", height = 800)
+                                 plotOutput("left_plot", height = 750)
                           ),
                           #O'Hare (right) chart
                           column(5,
-                                 plotOutput("right_plot", height = 800)
+                                 plotOutput("right_plot", height = 750)
                           ),
                           column(1)
                         ),
                       
-                        fluidRow( style="padding-top: 2%; padding-bottom: 5%",
+                        fluidRow( style="padding-top: 2%; padding-bottom: 18%",
                           #UIC Halsted (left) control panel
                           column(6, align="center",
                                 selectInput("select_left", "Select Station", stations, selected="UIC-Halsted"),
@@ -69,11 +84,15 @@ ui <- shinyUI(
                       )
               ),
              tabPanel("About",
-                      h4("About page")
+                      fluidPage(
+                          fluidRow(
+                            h4("About page")
+                          )                     
+                      )
               ),
              tags$style(type="text/css", 
                         '.navbar{
-                font-size: 30px;
+                font-size: 20px;
              }')
   )
 )
@@ -131,31 +150,49 @@ server <- function(input, output) {
     monthColor <- c("red","red","red","red","red","red","red","red","red","red","red","red")
     weekDayLimit = c(1,2,3,4,5,6,7)
     weekDayLabel <- c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun")
+    seasons_label <- c("Spring", "Summer", "Fall", "Winter")
+    seasons_color <- c("gold2","palegreen3","sienna1","blue")
     
     #UIC by year
     if(p_year_select == "All Years"){
-      ggplot(data=p_all_data, aes(factor(year(ymd(newDates))), rides, fill=factor(year(ymd(newDates))))) +
+      a<-ggplot(data=p_all_data, aes(factor(year(ymd(newDates))), rides, fill=factor(year(ymd(newDates))))) +
         geom_bar(stat="identity") + labs(x = "Year", y = "Rides", title = paste(p_station,"Rides per Year"), fill="Years") +
         theme(axis.text=element_text(size=6))
+      
+      # Adjust the colors for whichever graph is shown
+      a
     }
     else if(p_year_select == "Each Day"){
-      ggplot(data=uic2021, aes(newDates, rides) ) +
-        geom_bar(stat="identity") + labs(x = paste("Days in", p_year), y = "Rides", title = paste(p_station,"Rides per Day in",p_year))
+      b<-ggplot(data=uic2021, aes(newDates, rides, fill=season) ) +
+        geom_bar(stat="identity") + 
+        labs(x = paste("Days in", p_year), y = "Rides", title = paste(p_station,"Rides per Day in",p_year))+
+        scale_fill_manual(labels=seasons_label, values=seasons_color)
+      
+      b
     }
     else if(p_year_select == "Each Month"){
-      ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
+      c<-ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
                                fill=factor(month(ymd(newDates))))) +
         geom_bar(stat="identity") + 
         labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Month") +
         scale_x_discrete(limit = factor(monthLimit), labels=monthLabel) +
         scale_fill_discrete(name = "Month", labels = monthLabel)
+      #Adjust colors for UIC-Halsted 
+      if(p_station == "UIC-Halsted"){
+        c <- c + scale_fill_manual(labels=monthLabel, values=c("seagreen", "seagreen", "seagreen", "seagreen", "indianred1", "indianred1", "indianred1", "indianred1", "seagreen", "seagreen", "seagreen", "indianred1")) 
+      }
+      c
     }
     else if(p_year_select == "Each Day of Week"){
-      ggplot(data=uic2021, aes(factor(wday(newDates)), rides, fill=factor(wday(newDates)))) + 
+      d<-ggplot(data=uic2021, aes(factor(wday(newDates)), rides, fill=factor(wday(newDates)))) + 
         geom_bar(stat="identity") + 
         labs(x = paste("Weekdays in", p_year), y = "Rides", title = paste(p_station,"Rides per Weekday in", p_year), fill="Weekday") +
         scale_x_discrete(limit = factor(weekDayLimit), labels=weekDayLabel) +
         scale_fill_discrete(name = "Weekday", labels = weekDayLabel)
+      if(p_station == "UIC-Halsted"){
+        d <- d + scale_fill_manual(labels=monthLabel, values=c("indianred1", "seagreen", "seagreen", "seagreen", "seagreen", "seagreen", "indianred1")) 
+      }
+      d
     }
     else{
       a<-ggplot(data=p_all_data, aes(factor(year(ymd(newDates))), rides, fill=factor(year(ymd(newDates))))) +
@@ -181,6 +218,10 @@ server <- function(input, output) {
         scale_x_discrete(limit = factor(weekDayLimit), labels=weekDayLabel) +
         scale_fill_discrete(name = "Weekday", labels = weekDayLabel) +
         theme(legend.position = "none")
+      
+      #add custom colors to graphs
+      
+      
       grid.arrange(a,b,c,d,nrow=2)
     }
     
@@ -209,31 +250,45 @@ server <- function(input, output) {
     monthColor <- c("red","red","red","red","red","red","red","red","red","red","red","red")
     weekDayLimit = c(1,2,3,4,5,6,7)
     weekDayLabel <- c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun")
+    seasons_label <- c("Spring", "Summer", "Fall", "Winter")
+    seasons_color <- c("gold2","palegreen3","sienna1","blue")
     
     #UIC by year
     if(p_year_select == "All Years"){
-      ggplot(data=p_all_data, aes(factor(year(ymd(newDates))), rides, fill=factor(year(ymd(newDates))))) +
+      a<-ggplot(data=p_all_data, aes(factor(year(ymd(newDates))), rides, fill=factor(year(ymd(newDates))))) +
         geom_bar(stat="identity") + labs(x = "Year", y = "Rides", title = paste(p_station,"Rides per Year"), fill="Years") +
         theme(axis.text=element_text(size=6))
+      a
     }
     else if(p_year_select == "Each Day"){
-      ggplot(data=uic2021, aes(newDates, rides) ) +
-        geom_bar(stat="identity") + labs(x = paste("Days in", p_year), y = "Rides", title = paste(p_station,"Rides per Day in",p_year))
+      b<-ggplot(data=uic2021, aes(newDates, rides, fill=season) ) +
+        geom_bar(stat="identity") + 
+        labs(x = paste("Days in", p_year), y = "Rides", title = paste(p_station,"Rides per Day in",p_year))+
+        scale_fill_manual(labels=seasons_label, values=seasons_color)
+      b
     }
     else if(p_year_select == "Each Month"){
-      ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
-                               fill=factor(month(ymd(newDates))))) +
+      c<-ggplot(data=uic2021, aes(factor(month(ymd(newDates))), as.numeric(rides), 
+                                  fill=factor(month(ymd(newDates))))) +
         geom_bar(stat="identity") + 
         labs(x = paste("Months in",p_year), y = "Rides", title = paste(p_station,"Rides per Month in", p_year), fill="Month") +
         scale_x_discrete(limit = factor(monthLimit), labels=monthLabel) +
         scale_fill_discrete(name = "Month", labels = monthLabel)
+      if(p_station == "UIC-Halsted"){
+        c <- c + scale_fill_manual(labels=monthLabel, values=c("seagreen", "seagreen", "seagreen", "seagreen", "indianred1", "indianred1", "indianred1", "indianred1", "seagreen", "seagreen", "seagreen", "indianred1")) 
+      }
+      c
     }
     else if(p_year_select == "Each Day of Week"){
-      ggplot(data=uic2021, aes(factor(wday(newDates)), rides, fill=factor(wday(newDates)))) + 
+      d<-ggplot(data=uic2021, aes(factor(wday(newDates)), rides, fill=factor(wday(newDates)))) + 
         geom_bar(stat="identity") + 
         labs(x = paste("Weekdays in", p_year), y = "Rides", title = paste(p_station,"Rides per Weekday in", p_year), fill="Weekday") +
         scale_x_discrete(limit = factor(weekDayLimit), labels=weekDayLabel) +
         scale_fill_discrete(name = "Weekday", labels = weekDayLabel)
+      if(p_station == "UIC-Halsted"){
+        d <- d + scale_fill_manual(labels=monthLabel, values=c("indianred1", "seagreen", "seagreen", "seagreen", "seagreen", "seagreen", "indianred1")) 
+      }
+      d
     }
     else{
       a<-ggplot(data=p_all_data, aes(factor(year(ymd(newDates))), rides, fill=factor(year(ymd(newDates))))) +
