@@ -4,9 +4,7 @@
 # Author: Wayne Kao
 
 #TODO:
-# Add to about page
 # Test on Shiny app
-# Add third station for dataset
 
 
 #libraries to include
@@ -70,8 +68,17 @@ ui <- shinyUI(
               ),
              tabPanel("About",
                       fluidPage(
-                          fluidRow(
-                            h4("About page")
+                          fluidRow(style="font-size: 40px; padding-bottom: 15%",
+                            h1("CTA Rides Data"),
+                            h4("Author: Wayne Kao"),
+                            h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
+                            div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from 2001-2021
+                                from three stations: UIC-Halsted, O'Hare Airport, and 54th/Cermak. For UIC-Halsted, the coloring of the graph coresponds
+                                more to the UIC school year and timings of the year versus O'Hare and 54th/Cermak looks at more towards overall year
+                                based on the season. The data goes up to November 2021 so December of 2021 is missing in this dataset. You are able
+                                to switch graphs between looking at all the riders at a particular station with the following criteria:
+                                all years from 2001-2021, or all riders categorized by days, months, day of the week with a particular year.
+                                You are also given an option to view all graphs in a table like structure.")
                           )                     
                       )
               ),
